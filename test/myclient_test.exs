@@ -3,7 +3,7 @@ defmodule MyclientTest do
   # doctest Myclient
 
   test "make a HTTP successful call" do
-    url = "https://raw.githubusercontent.com/work-samples/myclient/master/LICENSE"
+    url = "https://api.github.com"
     %{body: _body,
       status_code: 200,
       request_url: ^url,
@@ -11,7 +11,7 @@ defmodule MyclientTest do
   end
 
   test "make a failed HTTP call" do
-    url = "https://raw.githubusercontent.com/work-samples/myclient/master/garbage"
+    url = "https://api.github.com/garbage"
     %{body: _body,
       status_code: 404,
       request_url: ^url,
@@ -19,7 +19,7 @@ defmodule MyclientTest do
   end
 
   test "make :ok/:error call" do
-    url = "https://raw.githubusercontent.com/work-samples/myclient/master/garbage"
+    url = "https://api.github.com/garbage"
     {:ok, %HTTPoison.Response{body: _body,
                               status_code: 404,
                               request_url: ^url,
@@ -30,9 +30,15 @@ defmodule MyclientTest do
   end
 
   test "get" do
-    {200, _body} = Myclient.get("https://raw.githubusercontent.com/work-samples/myclient/master/LICENSE")
-    {404, _body} = Myclient.get("https://raw.githubusercontent.com/work-samples/myclient/master/garbage")
+    {200, _body} = Myclient.get("https://api.github.com")
+    {404, _body} = Myclient.get("https://api.github.com/garbage")
     {:error, _reason} = Myclient.get("ppq://url.com")
+  end
+
+
+  test "test parse JSON" do
+    {:ok, %{a: 1}} = Poison.decode("{\"a\": 1}", keys: :atoms)
+    {:error, {:invalid, "g", 1}} = Poison.decode("{goop}", keys: :atoms)
   end
 
 end

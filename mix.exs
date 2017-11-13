@@ -6,6 +6,7 @@ defmodule Myclient.Mixfile do
 
   @deps [
     {:httpoison, "~> 0.13.0"},
+    {:poison, "~> 3.1"},
     {:ex_doc, ">= 0.0.0"},
   ]
 
