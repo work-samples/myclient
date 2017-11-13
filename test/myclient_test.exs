@@ -29,4 +29,10 @@ defmodule MyclientTest do
     {:error, %HTTPoison.Error{reason: :nxdomain}} = HTTPoison.get(url)
   end
 
+  test "get" do
+    {200, _body} = Myclient.get("https://raw.githubusercontent.com/work-samples/myclient/master/LICENSE")
+    {404, _body} = Myclient.get("https://raw.githubusercontent.com/work-samples/myclient/master/garbage")
+    {:error, _reason} = Myclient.get("ppq://url.com")
+  end
+
 end
