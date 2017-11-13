@@ -5,7 +5,7 @@ defmodule Myclient.Mixfile do
   @version "0.1.0"
 
   @deps [
-
+    {:httpoison, "~> 0.13.0"},
   ]
 
   # ------------------------------------------------------------
