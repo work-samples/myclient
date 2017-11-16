@@ -12,12 +12,15 @@ defmodule Myclient do
       iex> Myclient.get("http://localhost:4000")
       {200, %{version: "0.1.0"}}
 
+      iex> Myclient.get("http://localhost:4000", %{user: "andrew"})
+      {200, %{version: "0.1.0", user: "andrew"}}
+
       iex> Myclient.get("http://localhost:4000/droids/bb10")
       {404, %{error: "unknown_resource", reason: "/droids/bb10 is not the path you are looking for"}}
   """
-  def get(url, headers \\ []) do
+  def get(url, query_params \\ %{}, headers \\ []) do
     url
-    |> call(headers)
+    |> call(query_params, headers)
     |> content_type
     |> decode
   end
@@ -25,9 +28,10 @@ defmodule Myclient do
   @doc"""
   Call the API service
   """
-  def call(url, headers) do
+  def call(url, query_params \\ %{}, headers \\ []) do
     url
-    |> HTTPoison.get(headers)
+    |> clean_url
+    |> HTTPoison.get(headers, params: query_params)
     |> case do
         {:ok, %{body: raw_body, status_code: code, headers: headers}} ->
           {code, raw_body, headers}
@@ -59,7 +63,6 @@ defmodule Myclient do
   def content_type([]), do: "application/json"
   def content_type([{ "Content-Type", val } | _]), do: val |> String.split(";") |> List.first
   def content_type([_ | t]), do: t |> content_type
-
 
   @doc"""
   Decode the response body
@@ -99,5 +102,34 @@ defmodule Myclient do
     end
   end
   def decode({ok, body, _}), do: {ok, body}
+
+
+  @doc"""
+  Clean the URL, if there is a port, but nothing after, then ensure there's a
+  ending '/' otherwise you will encounter something like
+  hackney_url.erl:204: :hackney_url.parse_netloc/2
+
+  ## Examples
+
+      iex> Myclient.clean_url("http://localhost")
+      "http://localhost"
+
+      iex> Myclient.clean_url("http://localhost:4000/b")
+      "http://localhost:4000/b"
+
+      iex> Myclient.clean_url("http://localhost:4000")
+      "http://localhost:4000/"
+
+  """
+  def clean_url(url) do
+    url
+    |> String.split(":")
+    |> List.last
+    |> Integer.parse
+    |> case do
+         {_, ""} -> url <> "/"
+         _ -> url
+       end
+  end
 
 end
