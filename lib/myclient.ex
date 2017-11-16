@@ -19,24 +19,46 @@ defmodule Myclient do
       {404, %{error: "unknown_resource", reason: "/droids/bb10 is not the path you are looking for"}}
   """
   def get(url, query_params \\ %{}, headers \\ []) do
-    url
-    |> call(query_params, headers)
-    |> content_type
-    |> decode
+    call(url, :get, "", query_params, headers)
+  end
+
+  @doc"""
+  Send a POST request to the API
+
+  ## Examples
+
+      iex> Myclient.post("http://localhost:4000", %{version: "2.0.0"})
+      {201, %{version: "2.0.0"}}
+
+  """
+  def post(url, body \\ nil, headers \\ []) do
+    call(url, :post, body, %{}, headers)
   end
 
   @doc"""
   Call the API service
+
+  ## Examples
+
+      iex> Myclient.call("http://localhost:4000", :post, %{version: "2.0.0"}, %{user: "james"})
+      {201, %{version: "2.0.0", user: "james"}}
+
   """
-  def call(url, query_params \\ %{}, headers \\ []) do
-    url
-    |> clean_url
-    |> HTTPoison.get(headers, params: query_params)
+  def call(url, method, body \\ "", query_params \\ %{}, headers \\ []) do
+    HTTPoison.request(
+      method,
+      url |> clean_url,
+      body |> encode(content_type(headers)),
+      headers |> clean_headers,
+      params: query_params
+    )
     |> case do
         {:ok, %{body: raw_body, status_code: code, headers: headers}} ->
           {code, raw_body, headers}
         {:error, %{reason: reason}} -> {:error, reason, []}
        end
+    |> content_type
+    |> decode
   end
 
   @doc"""
@@ -63,6 +85,29 @@ defmodule Myclient do
   def content_type([]), do: "application/json"
   def content_type([{ "Content-Type", val } | _]), do: val |> String.split(";") |> List.first
   def content_type([_ | t]), do: t |> content_type
+
+  @doc"""
+  Encode the body to pass along to the server
+
+  ## Examples
+
+      iex> Myclient.encode(%{a: 1}, "application/json")
+      "{\\"a\\":1}"
+
+      iex> Myclient.encode("<xml/>", "application/xml")
+      "<xml/>"
+
+      iex> Myclient.encode(%{a: "o ne"}, "application/x-www-form-urlencoded")
+      "a=o+ne"
+
+      iex> Myclient.encode("goop", "application/mytsuff")
+      "goop"
+
+  """
+  def encode(data, "application/json"), do: Poison.encode!(data)
+  def encode(data, "application/xml"), do: data
+  def encode(data, "application/x-www-form-urlencoded"), do: URI.encode_query(data)
+  def encode(data, _), do: data
 
   @doc"""
   Decode the response body
@@ -135,5 +180,22 @@ defmodule Myclient do
          _ -> url
        end
   end
+
+  @doc"""
+  Clean the URL, if there is a port, but nothing after, then ensure there's a
+  ending '/' otherwise you will encounter something like
+  hackney_url.erl:204: :hackney_url.parse_netloc/2
+
+  ## Examples
+
+      iex> Myclient.clean_headers([])
+      [{"Content-Type", "application/json; charset=utf-8"}]
+
+      iex> Myclient.clean_headers([{"apples", "delicious"}])
+      [{"apples", "delicious"}]
+
+  """
+  def clean_headers([]), do: [{"Content-Type", "application/json; charset=utf-8"}]
+  def clean_headers(h), do: h
 
 end
