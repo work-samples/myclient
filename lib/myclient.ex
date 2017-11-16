@@ -72,6 +72,9 @@ defmodule Myclient do
       iex> Myclient.decode({:ok, "{\\\"a\\\": 1}", "application/json"})
       {:ok, %{a: 1}}
 
+      iex> Myclient.decode({500, "", "application/json"})
+      {500, ""}
+
       iex> Myclient.decode({:error, "{\\\"a\\\": 1}", "application/json"})
       {:error, %{a: 1}}
 
@@ -86,6 +89,7 @@ defmodule Myclient do
 
   """
   def decode({ok, body, _}) when is_atom(body), do: {ok, body}
+  def decode({ok, "", _}), do: {ok, ""}
   def decode({ok, body, "application/json"}) do
     body
     |> Poison.decode(keys: :atoms)
