@@ -1,6 +1,6 @@
 defmodule MyclientTest do
   use ExUnit.Case
-  # doctest Myclient
+  doctest Myclient
 
   test "make a HTTP successful call" do
     url = "https://api.github.com"

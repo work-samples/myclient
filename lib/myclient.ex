@@ -1,6 +1,20 @@
 defmodule Myclient do
 
 
+  @doc"""
+  Send a GET request to the API
+
+  ## Examples
+
+      iex> Myclient.get("http://localhost:4849")
+      {:error, :econnrefused}
+
+      iex> Myclient.get("http://localhost:4000")
+      {200, %{version: "0.1.0"}}
+
+      iex> Myclient.get("http://localhost:4000/droids/bb10")
+      {404, %{error: "unknown_resource", reason: "/droids/bb10 is not the path you are looking for"}}
+  """
   def get(url, headers \\ []) do
     url
     |> call(headers)
