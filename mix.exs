@@ -8,6 +8,7 @@ defmodule Myclient.Mixfile do
     {:httpoison, "~> 0.13.0"},
     {:poison, "~> 3.1"},
     {:ex_doc, ">= 0.0.0"},
+    {:mix_test_watch, "~> 0.5", only: [:test, :dev]},
   ]
 
   # ------------------------------------------------------------
