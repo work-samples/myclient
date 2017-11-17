@@ -10,7 +10,7 @@ defmodule Myclient.Client do
 
   """
   def current_version() do
-    "http://localhost:4000"
+    ""
     |> Myclient.Api.get
     |> (fn {200, %{version: version}} -> version end).()
   end
@@ -25,7 +25,7 @@ defmodule Myclient.Client do
 
   """
   def next_version(version) do
-    "http://localhost:4000"
+    ""
     |> Myclient.Api.post(%{version: version})
     |> (fn {201, %{version: version}} -> version end).()
   end
@@ -46,7 +46,7 @@ defmodule Myclient.Client do
 
   """
   def profile(token \\ nil) do
-    "http://localhost:4000/profile"
+    "/profile"
     |> Myclient.Api.get([], [Myclient.Api.authorization_header(token)])
     |> (fn
           {200, answer} -> {:ok, answer}

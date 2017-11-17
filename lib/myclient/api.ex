@@ -1,5 +1,7 @@
 defmodule Myclient.Api do
 
+  @default_service_url "http://localhost:4000"
+
   @doc"""
   Send a GET request to the API
 
@@ -84,6 +86,25 @@ defmodule Myclient.Api do
          t -> t
        end
     |> (fn t -> {"Authorization", "Bearer #{t}"} end).()
+  end
+
+  @doc"""
+  The service's default URL, it will lookup the config,
+  possibly check the env variables and default if still not found
+
+  ## Examples
+
+      iex> Myclient.Api.service_url()
+      "http://localhost:4000"
+
+  """
+  def service_url() do
+    Application.get_env(:myclient, :service_url)
+    |> case do
+         {:system, lookup} -> System.get_env(lookup)
+         nil -> @default_service_url
+         url -> url
+       end
   end
 
   @doc"""
@@ -185,6 +206,18 @@ defmodule Myclient.Api do
 
   ## Examples
 
+      iex> Myclient.Api.clean_url()
+      "http://localhost:4000/"
+
+      iex> Myclient.Api.clean_url(nil)
+      "http://localhost:4000/"
+
+      iex> Myclient.Api.clean_url("")
+      "http://localhost:4000/"
+
+      iex> Myclient.Api.clean_url("/profile")
+      "http://localhost:4000/profile"
+
       iex> Myclient.Api.clean_url("http://localhost")
       "http://localhost"
 
@@ -195,7 +228,22 @@ defmodule Myclient.Api do
       "http://localhost:4000/"
 
   """
-  def clean_url(url) do
+  def clean_url(url \\ nil) do
+    url
+    |> endpoint_url
+    |> slash_cleanup
+  end
+
+  defp endpoint_url(endpoint) do
+    case endpoint do
+       nil -> service_url()
+       "" -> service_url()
+       "/" <> _ -> service_url() <> endpoint
+       _ -> endpoint
+     end
+  end
+
+  defp slash_cleanup(url) do
     url
     |> String.split(":")
     |> List.last
