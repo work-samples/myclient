@@ -49,7 +49,7 @@ defmodule Myclient.Api do
       url |> clean_url,
       body |> encode(content_type(headers)),
       headers |> clean_headers,
-      params: query_params
+      query_params |> clean_params
     )
     |> case do
         {:ok, %{body: raw_body, status_code: code, headers: headers}} ->
@@ -58,6 +58,32 @@ defmodule Myclient.Api do
        end
     |> content_type
     |> decode
+  end
+
+  @doc"""
+  Resolve the shared secret token, if provided then simply return itself, otherwise
+  lookup in the configs.
+
+  ## Examples
+
+      iex> Myclient.Api.authorization_header("abc123")
+      {"Authorization", "Bearer abc123"}
+
+      iex> Myclient.Api.authorization_header()
+      {"Authorization", "Bearer "}
+
+  """
+  def authorization_header(token \\ nil) do
+    token
+    |> case do
+         nil -> Application.get_env(:myclient, :token)
+         t -> t
+       end
+    |> case do
+         {:system, lookup} -> System.get_env(lookup)
+         t -> t
+       end
+    |> (fn t -> {"Authorization", "Bearer #{t}"} end).()
   end
 
   @doc"""
@@ -134,7 +160,7 @@ defmodule Myclient.Api do
   """
   def decode({ok, body, _}) when is_atom(body), do: {ok, body}
   def decode({ok, "", _}), do: {ok, ""}
-  def decode({ok, body, "application/json"}) do
+  def decode({ok, body, "application/json"}) when is_binary(body) do
     body
     |> Poison.decode(keys: :atoms)
     |> case do
@@ -225,5 +251,8 @@ defmodule Myclient.Api do
          _ -> h
        end
   end
+
+  def clean_params(query_params) when query_params == %{}, do: []
+  def clean_params(query_params), do: [{:params, query_params}]
 
 end

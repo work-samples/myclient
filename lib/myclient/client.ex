@@ -30,4 +30,29 @@ defmodule Myclient.Client do
     |> (fn {201, %{version: version}} -> version end).()
   end
 
+  @doc"""
+  Extract the profile data for the provided token
+
+  ## Examples
+
+      iex> Myclient.Client.profile("abc123")
+      {:ok, %{answer: 42}}
+
+      iex> Myclient.Client.profile("def456")
+      {:error, "Forbidden; No access to this resource"}
+
+      iex> Myclient.Client.profile("xxx")
+      {:error, "Unauthorized; Invalid credentials"}
+
+  """
+  def profile(token \\ nil) do
+    "http://localhost:4000/profile"
+    |> Myclient.Api.get([], [Myclient.Api.authorization_header(token)])
+    |> (fn
+          {200, answer} -> {:ok, answer}
+          {_, %{error: error, reason: reason}} -> {:error, "#{error}; #{reason}"}
+          {_, reason} -> {:error, reason}
+        end).()
+  end
+
 end
