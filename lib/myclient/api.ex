@@ -185,16 +185,45 @@ defmodule Myclient.Api do
   ending '/' otherwise you will encounter something like
   hackney_url.erl:204: :hackney_url.parse_netloc/2
 
+  Also allow headers to be provided as a %{}, makes it easier to ensure defaults are
+  set
+
   ## Examples
+
+      iex> Myclient.Api.clean_headers(%{})
+      [{"Content-Type", "application/json; charset=utf-8"}]
+
+      iex> Myclient.Api.clean_headers(%{"Content-Type" => "application/xml"})
+      [{"Content-Type", "application/xml"}]
+
+      iex> Myclient.Api.clean_headers(%{"Authorization" => "Bearer abc123"})
+      [{"Authorization","Bearer abc123"}, {"Content-Type", "application/json; charset=utf-8"}]
+
+      iex> Myclient.Api.clean_headers(%{"Authorization" => "Bearer abc123", "Content-Type" => "application/xml"})
+      [{"Authorization","Bearer abc123"}, {"Content-Type", "application/xml"}]
 
       iex> Myclient.Api.clean_headers([])
       [{"Content-Type", "application/json; charset=utf-8"}]
 
       iex> Myclient.Api.clean_headers([{"apples", "delicious"}])
-      [{"apples", "delicious"}]
+      [{"Content-Type", "application/json; charset=utf-8"}, {"apples", "delicious"}]
+
+      iex> Myclient.Api.clean_headers([{"apples", "delicious"}, {"Content-Type", "application/xml"}])
+      [{"apples", "delicious"}, {"Content-Type", "application/xml"}]
 
   """
-  def clean_headers([]), do: [{"Content-Type", "application/json; charset=utf-8"}]
-  def clean_headers(h), do: h
+  def clean_headers(h) when is_map(h) do
+    %{"Content-Type" => "application/json; charset=utf-8"}
+    |> Map.merge(h)
+    |> Enum.map(&(&1))
+  end
+  def clean_headers(h) when is_list(h) do
+    h
+    |> Enum.filter(fn {k,_v} -> k == "Content-Type" end)
+    |> case do
+         [] -> [{"Content-Type", "application/json; charset=utf-8"} | h ]
+         _ -> h
+       end
+  end
 
 end

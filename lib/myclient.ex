@@ -8,13 +8,6 @@ defmodule Myclient do
       iex> Myclient.get("http://localhost:4000")
       {200, %{version: "0.1.0"}}
 
-      defmodule Myclient do
-
-        defdelegate get(url, query_params \\ %{}, headers \\ []), to: Myclient.Api
-        defdelegate post(url, body \\ nil, headers \\ []), to: Myclient.Api
-
-      end
-
   """
   defdelegate get(url, query_params \\ %{}, headers \\ []), to: Myclient.Api
 
