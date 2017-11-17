@@ -8,6 +8,13 @@ defmodule Myclient do
       iex> Myclient.get("http://localhost:4000")
       {200, %{version: "0.1.0"}}
 
+      defmodule Myclient do
+
+        defdelegate get(url, query_params \\ %{}, headers \\ []), to: Myclient.Api
+        defdelegate post(url, body \\ nil, headers \\ []), to: Myclient.Api
+
+      end
+
   """
   defdelegate get(url, query_params \\ %{}, headers \\ []), to: Myclient.Api
 
@@ -21,5 +28,28 @@ defmodule Myclient do
 
   """
   defdelegate post(url, body \\ nil, headers \\ []), to: Myclient.Api
+
+
+  @doc"""
+  Extract the current version
+
+  ## Examples
+
+      iex> Myclient.current_version()
+      "0.1.0"
+
+  """
+  defdelegate current_version(), to: Myclient.Client
+
+  @doc"""
+  Set the next version
+
+  ## Examples
+
+      iex> Myclient.next_version("1.2.3")
+      "1.2.3"
+
+  """
+  defdelegate next_version(version), to: Myclient.Client
 
 end

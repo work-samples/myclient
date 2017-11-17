@@ -1,6 +1,5 @@
 defmodule Myclient.ApiTest do
   use ExUnit.Case
-  doctest Myclient.Api
 
   test "get" do
     {200, _body} = Myclient.Api.get("http://localhost:4000")
