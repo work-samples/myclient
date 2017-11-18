@@ -1,6 +1,7 @@
 use Mix.Config
 
 config :myclient,
+  token: "abc123",
   oauth2: %{
     client_id: "clientx",
     redirect_uri: "http://localhost:4000"

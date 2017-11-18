@@ -68,11 +68,11 @@ defmodule Myclient.Api do
 
   ## Examples
 
-      iex> Myclient.Api.authorization_header("abc123")
-      {"Authorization", "Bearer abc123"}
+      iex> Myclient.Api.authorization_header("def456")
+      {"Authorization", "Bearer def456"}
 
       iex> Myclient.Api.authorization_header()
-      {"Authorization", "Bearer "}
+      {"Authorization", "Bearer abc123"}
 
   """
   def authorization_header(token \\ nil) do
