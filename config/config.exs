@@ -1,5 +1,12 @@
 use Mix.Config
 
+config :myclient,
+  oauth2: %{
+    client_id: "clientx",
+    redirect_uri: "http://localhost:4000"
+  }
+
+
 #     config(:myclient, key: :value)
 #
 # And access this configuration in your application as:

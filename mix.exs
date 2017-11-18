@@ -26,6 +26,7 @@ defmodule Myclient.Mixfile do
 
   def application do
     [
+      mod: { Myclient.Application, [] },
       extra_applications: [         # built-in apps that need starting
         :logger
       ],
