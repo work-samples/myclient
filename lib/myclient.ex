@@ -45,4 +45,14 @@ defmodule Myclient do
   """
   defdelegate next_version(version), to: Myclient.Client
 
+  @doc"""
+  Extract the profile data for the provided token
+
+  ## Examples
+
+      iex> Myclient.Client.profile
+      {:ok, %{answer: 42}}
+
+  """
+  defdelegate profile(token \\ nil), to: Myclient.Client
 end
